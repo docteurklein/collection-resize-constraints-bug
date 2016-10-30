@@ -23,7 +23,8 @@ class DefaultController extends Controller
     {
         $form = $this->createForm(TestType::class, [
             'translations' => [
-                'default entry'
+                'fr' => 'default lang entry',
+                'en' => 'english entry',
             ],
         ]);
         $form->handleRequest($request);
@@ -32,7 +33,8 @@ class DefaultController extends Controller
 
         return $this->render('default/index.html.twig', [
             'form' => $form->createView(),
-            'base_dir' => realpath($this->getParameter('kernel.root_dir').'/..').DIRECTORY_SEPARATOR,
+            'valid' => $form->isValid(),
+            'data' => $form->getData(),
         ]);
     }
 }
@@ -42,7 +44,7 @@ class TestType extends AbstractType
     public function buildForm(FormBuilderInterface $builder, array $options)
     {
         $builder
-            ->add('isValid', CheckboxType::class, [
+            ->add('isActive', CheckboxType::class, [
                 'required' => false,
             ])
             ->add('translations', CollectionType::class, [
@@ -54,9 +56,14 @@ class TestType extends AbstractType
         ;
 
         $builder->get('translations')->addEventListener(FormEvents::SUBMIT, function($event) {
+            if (!$event->getForm()->getParent()->get('isActive')->getData()) {
+                // product is not marked as active
+                return;
+            }
+            // product is marked as active: we want to make sure its defaut translation (fr) is provided
             $form = $event->getForm();
-            $form->add(0, TextType::class, [
-                'constraints' => [new NotBlank],
+            $form->add('fr', TextType::class, [
+                'constraints' => [new NotBlank], // NotBlank is added to the "fr" entry ONLY
                 'required' => false,
             ]);
         });

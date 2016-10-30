@@ -1,6 +1,9 @@
 {% extends 'base.html.twig' %}
 
 {% block body %}
-<h1>entry number 0 should not be blankable</h1>
 {{form(form)}}
+<hr/>
+valid ? {{ dump(valid)}}
+<hr/>
+data: {{ dump(data)}}
 {% endblock %}
